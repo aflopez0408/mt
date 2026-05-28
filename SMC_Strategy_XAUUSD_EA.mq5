@@ -48,12 +48,12 @@ input bool     InpShowOB = true;          // Mostrar Order Blocks en grafico
 
 input group "=== FILTRO DE SESION ==="
 input bool     InpUseSessionFilter = true;  // Usar filtro de sesion
-input int      InpLondonStart = 2;          // London KZ Inicio (hora UTC)
-input int      InpLondonEnd = 5;            // London KZ Fin (hora UTC)
-input int      InpNYStart = 7;              // NY KZ Inicio (hora UTC)
-input int      InpNYEnd = 10;              // NY KZ Fin (hora UTC)
-input int      InpLondonCloseStart = 10;    // London Close Inicio (hora UTC)
-input int      InpLondonCloseEnd = 12;      // London Close Fin (hora UTC)
+input int      InpLondonStart = 2;          // London KZ Inicio (hora servidor)
+input int      InpLondonEnd = 5;            // London KZ Fin (hora servidor)
+input int      InpNYStart = 7;              // NY KZ Inicio (hora servidor)
+input int      InpNYEnd = 10;              // NY KZ Fin (hora servidor)
+input int      InpLondonCloseStart = 10;    // London Close Inicio (hora servidor)
+input int      InpLondonCloseEnd = 12;      // London Close Fin (hora servidor)
 
 input group "=== CONFIGURACION DE ENTRADAS ==="
 input ENUM_ENTRY_TYPE InpEntryType = ENTRY_BOTH; // Tipo de operaciones
