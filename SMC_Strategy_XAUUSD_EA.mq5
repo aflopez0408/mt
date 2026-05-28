@@ -127,7 +127,7 @@ int            lastProcessedBars = 0;
 int OnInit()
 {
    trade.SetExpertMagicNumber(InpMagicNumber);
-   trade.SetDeviations(10);
+   trade.SetDeviation(10);
    trade.SetTypeFilling(ORDER_FILLING_FOK);
    
    symInfo.Name(_Symbol);
