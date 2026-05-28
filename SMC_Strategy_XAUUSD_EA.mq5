@@ -8,7 +8,6 @@
 #property version   "1.00"
 #property strict
 
-#include <Trade\Trade.mqh>
 #include <Trade\PositionInfo.mqh>
 #include <Trade\SymbolInfo.mqh>
 
@@ -94,7 +93,6 @@ struct SwingPoint
 //+------------------------------------------------------------------+
 //| VARIABLES GLOBALES                                                 |
 //+------------------------------------------------------------------+
-CTrade         trade;
 CPositionInfo  posInfo;
 CSymbolInfo    symInfo;
 
@@ -126,10 +124,6 @@ int            lastProcessedBars = 0;
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   trade.SetExpertMagicNumber(InpMagicNumber);
-   trade.SetDeviation(10);
-   trade.SetTypeFilling(ORDER_FILLING_FOK);
-   
    symInfo.Name(_Symbol);
    symInfo.Refresh();
    
@@ -611,10 +605,25 @@ bool ExecuteBuy(double lots, double sl, double tp)
    sl = NormalizeDouble(sl, (int)symInfo.Digits());
    tp = NormalizeDouble(tp, (int)symInfo.Digits());
    
-   if(trade.Buy(lots, _Symbol, ask, sl, tp, "SMC_Long"))
-      return true;
+   MqlTradeRequest request = {};
+   MqlTradeResult  result = {};
    
-   Print("Error Buy: ", trade.ResultRetcode(), " - ", trade.ResultRetcodeDescription());
+   request.action    = TRADE_ACTION_DEAL;
+   request.symbol    = _Symbol;
+   request.volume    = lots;
+   request.type      = ORDER_TYPE_BUY;
+   request.price     = ask;
+   request.sl        = sl;
+   request.tp        = tp;
+   request.deviation = 10;
+   request.magic     = InpMagicNumber;
+   request.comment   = "SMC_Long";
+   request.type_filling = ORDER_FILLING_FOK;
+   
+   if(OrderSend(request, result))
+      return (result.retcode == TRADE_RETCODE_DONE || result.retcode == TRADE_RETCODE_PLACED);
+   
+   Print("Error Buy: ", result.retcode, " - ", result.comment);
    return false;
 }
 
@@ -624,10 +633,25 @@ bool ExecuteSell(double lots, double sl, double tp)
    sl = NormalizeDouble(sl, (int)symInfo.Digits());
    tp = NormalizeDouble(tp, (int)symInfo.Digits());
    
-   if(trade.Sell(lots, _Symbol, bid, sl, tp, "SMC_Short"))
-      return true;
+   MqlTradeRequest request = {};
+   MqlTradeResult  result = {};
    
-   Print("Error Sell: ", trade.ResultRetcode(), " - ", trade.ResultRetcodeDescription());
+   request.action    = TRADE_ACTION_DEAL;
+   request.symbol    = _Symbol;
+   request.volume    = lots;
+   request.type      = ORDER_TYPE_SELL;
+   request.price     = bid;
+   request.sl        = sl;
+   request.tp        = tp;
+   request.deviation = 10;
+   request.magic     = InpMagicNumber;
+   request.comment   = "SMC_Short";
+   request.type_filling = ORDER_FILLING_FOK;
+   
+   if(OrderSend(request, result))
+      return (result.retcode == TRADE_RETCODE_DONE || result.retcode == TRADE_RETCODE_PLACED);
+   
+   Print("Error Sell: ", result.retcode, " - ", result.comment);
    return false;
 }
 
@@ -655,14 +679,32 @@ void ManageTrailingStop()
          double bid = symInfo.Bid();
          double newSL = NormalizeDouble(bid - (atr * InpTrailATRMult), (int)symInfo.Digits());
          if(newSL > currentSL && newSL > openPrice)
-            trade.PositionModify(ticket, newSL, currentTP);
+         {
+            MqlTradeRequest req = {};
+            MqlTradeResult  res = {};
+            req.action    = TRADE_ACTION_SLTP;
+            req.symbol    = _Symbol;
+            req.position  = ticket;
+            req.sl        = newSL;
+            req.tp        = currentTP;
+            OrderSend(req, res);
+         }
       }
       else if(posInfo.PositionType() == POSITION_TYPE_SELL)
       {
          double ask = symInfo.Ask();
          double newSL = NormalizeDouble(ask + (atr * InpTrailATRMult), (int)symInfo.Digits());
          if((newSL < currentSL || currentSL == 0) && newSL < openPrice)
-            trade.PositionModify(ticket, newSL, currentTP);
+         {
+            MqlTradeRequest req = {};
+            MqlTradeResult  res = {};
+            req.action    = TRADE_ACTION_SLTP;
+            req.symbol    = _Symbol;
+            req.position  = ticket;
+            req.sl        = newSL;
+            req.tp        = currentTP;
+            OrderSend(req, res);
+         }
       }
    }
 }
